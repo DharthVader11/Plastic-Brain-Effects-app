@@ -1,0 +1,160 @@
+// PlasticBrainVisualizer.jsx
+import React, { useState } from "react";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer } from "recharts";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
+
+const plasticData = {
+  PET: {
+    brainArea: "Minimal impact",
+    highlightRegion: null,
+    data: [
+      { compartment: "Brain", value: 2 },
+      { compartment: "Blood", value: 25 },
+      { compartment: "Excreted", value: 73 },
+    ],
+  },
+  PVC: {
+    brainArea: "Prefrontal Cortex",
+    highlightRegion: "prefrontal",
+    data: [
+      { compartment: "Brain", value: 20 },
+      { compartment: "Blood", value: 30 },
+      { compartment: "Excreted", value: 50 },
+    ],
+  },
+  PS: {
+    brainArea: "Amygdala",
+    highlightRegion: "amygdala",
+    data: [
+      { compartment: "Brain", value: 15 },
+      { compartment: "Blood", value: 40 },
+      { compartment: "Excreted", value: 45 },
+    ],
+  },
+  PC: {
+    brainArea: "Hippocampus",
+    highlightRegion: "hippocampus",
+    data: [
+      { compartment: "Brain", value: 25 },
+      { compartment: "Blood", value: 35 },
+      { compartment: "Excreted", value: 40 },
+    ],
+  },
+  HDPE: {
+    brainArea: "Low impact",
+    highlightRegion: null,
+    data: [
+      { compartment: "Brain", value: 1 },
+      { compartment: "Blood", value: 10 },
+      { compartment: "Excreted", value: 89 },
+    ],
+  },
+  LDPE: {
+    brainArea: "Temporal Lobe",
+    highlightRegion: "temporal",
+    data: [
+      { compartment: "Brain", value: 10 },
+      { compartment: "Blood", value: 20 },
+      { compartment: "Excreted", value: 70 },
+    ],
+  },
+  PP: {
+    brainArea: "Cerebellum",
+    highlightRegion: "cerebellum",
+    data: [
+      { compartment: "Brain", value: 5 },
+      { compartment: "Blood", value: 15 },
+      { compartment: "Excreted", value: 80 },
+    ],
+  },
+  PA: {
+    brainArea: "Occipital Lobe",
+    highlightRegion: "occipital",
+    data: [
+      { compartment: "Brain", value: 8 },
+      { compartment: "Blood", value: 22 },
+      { compartment: "Excreted", value: 70 },
+    ],
+  },
+};
+
+function BrainImage({ region }) {
+  const regions = ["prefrontal", "amygdala", "hippocampus", "temporal", "cerebellum", "occipital"];
+  const highlightStyles = {
+    prefrontal: { top: "20%", left: "42%" },
+    amygdala: { top: "58%", left: "48%" },
+    hippocampus: { top: "62%", left: "44%" },
+    temporal: { top: "68%", left: "58%" },
+    cerebellum: { top: "78%", left: "38%" },
+    occipital: { top: "38%", left: "66%" },
+  };
+
+  return (
+    <div className="relative h-72 w-full mb-6">
+      <img
+        src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/Human_brain_lateral_view.svg/800px-Human_brain_lateral_view.svg.png"
+        alt="Brain Outline"
+        className="absolute w-full h-full object-contain"
+      />
+      {regions.map((r) => (
+        <div
+          key={r}
+          className={`absolute rounded-full bg-purple-600 transition-opacity duration-300 ${region === r ? "opacity-80" : "opacity-0"}`}
+          style={{
+            width: "40px",
+            height: "40px",
+            ...highlightStyles[r],
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+export default function PlasticBrainVisualizer() {
+  const [selectedPlastic, setSelectedPlastic] = useState("PET");
+  const handlePlasticChange = (value) => setSelectedPlastic(value);
+
+  const { brainArea, data, highlightRegion } = plasticData[selectedPlastic];
+
+  return (
+    <div className="p-4 max-w-4xl mx-auto">
+      <h1 className="text-3xl font-bold mb-4 text-center">🧠 Plastic & Brain Effects Visualizer</h1>
+
+      <div className="mb-6 flex flex-col items-center">
+        <label className="text-lg mb-2">Select a plastic type:</label>
+        <Select onValueChange={handlePlasticChange} defaultValue={selectedPlastic}>
+          <SelectTrigger className="w-64">
+            <SelectValue placeholder="Choose plastic" />
+          </SelectTrigger>
+          <SelectContent>
+            {Object.keys(plasticData).map((plastic) => (
+              <SelectItem key={plastic} value={plastic}>
+                {plastic}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="bg-white rounded-2xl shadow p-6 mb-6">
+        <h2 className="text-xl font-semibold mb-2">🧠 Affected Brain Area</h2>
+        <p className="text-lg mb-4">{brainArea}</p>
+        <BrainImage region={highlightRegion} />
+      </div>
+
+      <div className="bg-white rounded-2xl shadow p-6">
+        <h2 className="text-xl font-semibold mb-4">📊 Distribution of Plastic</h2>
+        <ResponsiveContainer width="100%" height={300}>
+          <BarChart data={data}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="compartment" />
+            <YAxis domain={[0, 100]} unit="%" />
+            <Tooltip />
+            <Bar dataKey="value" fill="#4f46e5" radius={[4, 4, 0, 0]} />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+    </div>
+  );
+}
